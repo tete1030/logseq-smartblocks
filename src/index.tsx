@@ -31,6 +31,13 @@ let settings: SettingSchemaDesc[] = [
     title: "Keyboard Shortcut for Triggering Smartblocks",
     description: "keyboard shortcut to trigger smartblock insertion window",
     default: "mod+t"
+  },
+  {
+    key: "Date-With-Brackets",
+    type: "boolean",
+    title: "Insert date with brackets",
+    description: "Should we insert date with brackets?",
+    default: true
   }
 ]  
 async function checkTemplate(uuid) {

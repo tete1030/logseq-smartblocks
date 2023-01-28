@@ -1,9 +1,11 @@
-import { getDateForPage } from "logseq-dateutils";
+import { getDateForPageWithoutBrackets, getDateForPage } from "logseq-dateutils";
 import Sherlock from "sherlockjs";
 import { persistUUID } from "./insertUUID";
 
 import axios from "axios";
 import { blockUuid2, editNetworkRequest } from "./insertTemplatedBlock";
+import moment from "moment"
+
 // set APIKEY to be equal to the api key from github secrets
 const APIKEY = process.env.APIKEY;
 async function parseRandomly(pageName: string) {
@@ -72,6 +74,15 @@ function parseConditional(condition: string, value) {
       }
     default:
       return "Error";
+  }
+}
+
+function getDateForPageAccordingToSettings(date: Date, preferredDateFormat: string): string {
+  const use_brackets = logseq.settings?.["Date-With-Brackets"] ?? true;
+  if (use_brackets) {
+    return getDateForPage(date, preferredDateFormat);
+  } else {
+    return getDateForPageWithoutBrackets(date, preferredDateFormat);
   }
 }
 
@@ -150,7 +161,7 @@ export async function parseDynamically(blockContent) {
     if (currentp3age != null) {
       return shouldNotEncodeURL? currentp3age.originalName: encodeURIComponent(currentp3age.name);
     } else {
-      return shouldNotEncodeURL? getDateForPage(currentTime, preferredDateFormat): encodeURIComponent(getDateForPage(currentTime, preferredDateFormat));
+      return shouldNotEncodeURL? getDateForPageAccordingToSettings(currentTime, preferredDateFormat): encodeURIComponent(getDateForPageAccordingToSettings(currentTime, preferredDateFormat));
     }}
   }
   if (blockContent.match(uuid)){
@@ -178,6 +189,28 @@ export async function parseDynamically(blockContent) {
     }
     return shouldNotEncodeURL ? formattedTime : encodeURIComponent(formattedTime);
   }
+
+  // Implement week related parsing
+  if (
+    blockContent.toLowerCase() == "<%week number%>"
+  ) {
+    return moment(currentTime).week().toString();
+  }
+
+  if (
+    blockContent.toLowerCase() == "<%start of current week%>"
+  ) {
+    let time = moment(currentTime).subtract(currentTime.getDay(), 'days').toDate();
+    return shouldNotEncodeURL? getDateForPageAccordingToSettings(time, preferredDateFormat): encodeURIComponent(getDateForPageAccordingToSettings(time, preferredDateFormat));
+  }
+
+  if (
+    blockContent.toLowerCase() == "<%end of current week%>"
+  ) {
+    let time = moment(currentTime).add(6-currentTime.getDay(), 'days').toDate();
+    return shouldNotEncodeURL? getDateForPageAccordingToSettings(time, preferredDateFormat): encodeURIComponent(getDateForPageAccordingToSettings(time, preferredDateFormat));
+  }
+
   // Implement if parsing
   const parsedBlock = await Sherlock.parse(blockContent);
   // Destructure
@@ -186,7 +219,7 @@ export async function parseDynamically(blockContent) {
   if (startDate == null) {
     return blockContent;
   }
-  return shouldNotEncodeURL ? getDateForPage(startDate, preferredDateFormat): encodeURIComponent(getDateForPage(startDate, preferredDateFormat));
+  return shouldNotEncodeURL ? getDateForPageAccordingToSettings(startDate, preferredDateFormat): encodeURIComponent(getDateForPageAccordingToSettings(startDate, preferredDateFormat));
 }
 
 function parseProperties(text, currentPage) {

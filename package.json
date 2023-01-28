@@ -23,6 +23,7 @@
     "autoprefix": "^1.0.1",
     "axios": "^0.26.1",
     "logseq-dateutils": "latest",
+    "moment": "^2.29.4",
     "postcss-cli": "^9.1.0",
     "postcss-import": "^14.0.2",
     "react": "^17.0.2",
