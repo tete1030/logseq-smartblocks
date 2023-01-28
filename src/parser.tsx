@@ -211,6 +211,34 @@ export async function parseDynamically(blockContent) {
     return shouldNotEncodeURL? getDateForPageAccordingToSettings(time, preferredDateFormat): encodeURIComponent(getDateForPageAccordingToSettings(time, preferredDateFormat));
   }
 
+  if (
+    blockContent.toLowerCase() == "<%month%>"
+  ) {
+    let month = moment(currentTime).format('MMM');
+    return shouldNotEncodeURL? month: encodeURIComponent(month);
+  }
+
+  if (
+    blockContent.toLowerCase() == "<%start of current month%>"
+  ) {
+    let time = moment(currentTime).subtract(currentTime.getDate() - 1, 'days').toDate();
+    return shouldNotEncodeURL? getDateForPageAccordingToSettings(time, preferredDateFormat): encodeURIComponent(getDateForPageAccordingToSettings(time, preferredDateFormat));
+  }
+
+  if (
+    blockContent.toLowerCase() == "<%end of current month%>"
+  ) {
+    let time = moment(currentTime).add(1, 'months').subtract(1, 'days').toDate();
+    return shouldNotEncodeURL? getDateForPageAccordingToSettings(time, preferredDateFormat): encodeURIComponent(getDateForPageAccordingToSettings(time, preferredDateFormat));
+  }
+
+  if (
+    blockContent.toLowerCase() == "<%year%>"
+  ) {
+    let month = moment(currentTime).format('YYYY');
+    return shouldNotEncodeURL? month: encodeURIComponent(month);
+  }
+
   // Implement if parsing
   const parsedBlock = await Sherlock.parse(blockContent);
   // Destructure
